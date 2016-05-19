@@ -1,0 +1,161 @@
+<?php namespace ProcessWire;
+
+/**
+ * Class AdminThemeSemantic
+ *
+ * @property string $colors
+ *
+ */
+
+class AdminThemeSemantic extends AdminTheme implements Module, ConfigurableModule {
+
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Semantic UI Theme',
+			'version' => 1,
+			'summary' => 'Semantic ui theme.',
+			'autoload' => 'template=admin'
+			);
+	}
+
+	public function __construct() {
+		parent::__construct();
+		$this->set('color', '#F19E84');
+		$this->set('image', '');
+	}
+
+	public function init() {
+		parent::init();
+		if($this->isCurrent()) {
+			// this is the current admin theme
+			$this->addHookAfter('Page::render', $this, 'hookScripts');
+			$this->addHookAfter('Page::render', $this, 'hookStyles');
+		}
+	}
+
+
+
+
+	public function hookScripts(HookEvent $event) {
+	$scripts = <<<END
+	<script>
+
+	/* Search form */
+
+	 $('#search_item')
+	 .search({
+			 apiSettings: {
+					 url: '{$this->wire('config')->urls->admin}page/search/for?get=template_label,title&include=all&sort=template&admin_search={query}',
+					 onResponse: function (laRespuesta) {
+							 var response = {
+									 results: {}
+									 };
+
+							 $.each(laRespuesta.matches, function (index, item) {
+
+									 var type = item.type,
+											 maxResults = 50;
+
+									 if (index >= maxResults) {
+											 return false;
+									 }
+									 if (response.results[type] === undefined) {
+											 response.results[type] = {
+													 name: type,
+													 results: []
+											 };
+									 }
+									 if (response.results[type] === 'Pages') {
+											 response.results[type].results.push({
+													 title: item.name,
+													 description: item.template,
+													 url: item.editUrl
+											 });
+									 }
+									 else {
+										 response.results[type].results.push({
+											 title: item.title,
+											 description: item.template_label,
+											 url: item.editUrl
+									 });
+								 };
+							 });
+
+							 return response;
+					 }
+			 },
+			 // define custom fields
+			 fields: {
+					 results: 'results',
+					 title: 'title',
+					 category: 'type',
+					 actionURL: 'editUrl',
+			 },
+			 type: 'category',
+			 cache: true,
+			 minCharacters: 3,
+			 searchDelay: 500
+	 });
+
+	 </script>
+END;
+
+	 $event->return = str_replace('</body>', $scripts . '</body>', $event->return);
+}
+
+
+
+public function hookStyles(HookEvent $event) {
+
+$styles = "<style>body.pushable>.pusher{
+							background: $this->color;
+	background: url($this->image) no-repeat center center fixed; 
+-webkit-background-size: cover;
+-moz-background-size: cover;
+-o-background-size: cover;
+background-size: cover;
+}
+</style>";
+
+	$event->return = str_replace('</head>', $styles . '</head>', $event->return);
+}
+
+public function getModuleConfigArray() {
+		return array(
+			'color' => array(
+				'type' => 'text',
+				'label' => $this->_('Color Set'),
+				'value' => '#F19E84'
+			),
+			'image' => array(
+				'type' => 'text',
+				'label' => $this->_('Background image'),
+				'value' => 'https://www.google.es/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png'
+				)
+		);
+	}
+
+
+
+
+
+
+	public static function getModuleConfigInputfields(array $data) {
+     $inputfields = new InputfieldWrapper();
+     $data = array_merge(self::$defaults, $data);
+
+     $f = wire('modules')->get('InputfieldText');
+     $f->attr('name', 'color');
+     $f->attr('value', $data['color']);
+     $inputfields->add($f);
+
+     $f = wire('modules')->get('InputfieldText');
+     $f->attr('name', 'image');
+     $f->attr('value', $data['image']);
+     $inputfields->add($f);
+
+     return $inputfields;
+ }
+
+
+}
