@@ -114,7 +114,7 @@ public function hookStyles(HookEvent $event) {
 	};
 	if($this->image){
 	$styles .=	"body.pushable>.pusher{
-		background: url($this->image) no-repeat center center fixed;
+		background: url($this->image) no-repeat center center fixed!important;
 		-webkit-background-size: cover;
 		-moz-background-size: cover;
 		-o-background-size: cover;
