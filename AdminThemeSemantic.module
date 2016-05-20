@@ -106,17 +106,22 @@ END;
 
 
 public function hookStyles(HookEvent $event) {
-
-$styles = "<style>body.pushable>.pusher{
-							background: $this->color;
-	background: url($this->image) no-repeat center center fixed; 
--webkit-background-size: cover;
--moz-background-size: cover;
--o-background-size: cover;
-background-size: cover;
-}
-</style>";
-
+	$styles = "<style>";
+	if($this->color){
+	$styles .=	"body.pushable>.pusher{
+			background: $this->color!important;
+		}";
+	};
+	if($this->image){
+	$styles .=	"body.pushable>.pusher{
+		background: url($this->image) no-repeat center center fixed;
+		-webkit-background-size: cover;
+		-moz-background-size: cover;
+		-o-background-size: cover;
+		background-size: cover;
+		}";
+	};
+	$styles .= "</style>";
 	$event->return = str_replace('</head>', $styles . '</head>', $event->return);
 }
 
